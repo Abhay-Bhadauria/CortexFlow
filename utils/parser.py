@@ -1,0 +1,18 @@
+import json
+
+
+def parse_execution_plan(plan: str) -> dict:
+    """
+    Parse the planner's JSON response.
+    """
+
+    if not plan.strip():
+        raise ValueError("Planner returned an empty response.")
+
+    try:
+        return json.loads(plan)
+
+    except json.JSONDecodeError as e:
+        raise ValueError(
+            f"Invalid JSON received from Planner Agent.\n{e}"
+        )
