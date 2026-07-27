@@ -1,29 +1,36 @@
-import json
+import pytest
+from utils.parser import parse_execution_plan
 
 
-def parse_execution_plan(plan: str) -> dict:
+def test_parse_valid_json():
+    """Test parsing of valid JSON."""
+    plan = """
+    {
+        "tasks": [
+            {
+                "title": "Task 1",
+                "description": "Research AI agents"
+            }
+        ]
+    }
     """
-    Parse the planner's JSON response.
-    """
 
-    if not plan.strip():
-        raise ValueError("Planner returned an empty response.")
+    result = parse_execution_plan(plan)
 
-    # Remove Markdown code fences if present
-    plan = plan.strip()
+    assert isinstance(result, dict)
+    assert "tasks" in result
+    assert result["tasks"][0]["title"] == "Task 1"
 
-    if plan.startswith("```json"):
-        plan = plan.replace("```json", "", 1)
 
-    if plan.endswith("```"):
-        plan = plan[:-3]
+def test_parse_invalid_json():
+    """Test that invalid JSON raises ValueError."""
+    invalid_plan = "{ invalid json }"
 
-    plan = plan.strip()
+    with pytest.raises(ValueError, match="Invalid JSON"):
+        parse_execution_plan(invalid_plan)
 
-    try:
-        return json.loads(plan)
 
-    except json.JSONDecodeError as e:
-        raise ValueError(
-            f"Invalid JSON received from Planner Agent.\n{e}"
-        )
+def test_parse_empty_response():
+    """Test that an empty response raises ValueError."""
+    with pytest.raises(ValueError, match="empty response"):
+        parse_execution_plan("")
